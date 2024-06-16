@@ -1,0 +1,118 @@
+version: "3"
+services:
+  gluetun:
+    image: qmcgaw/gluetun
+    container_name: gluetun
+    # line above must be uncommented to allow external containers to connect.
+    # See https://github.com/qdm12/gluetun-wiki/blob/main/setup/connect-a-container-to-gluetun.md#external-container-to-gluetun
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    ports:
+      - 6881:6881
+      - 6881:6881/udp
+      - 8085:8085 # qbittorrent
+      - 8989:8989 # Sonarr
+      - 7878:7878 # Radarr
+      - 9696:9696 # Prowlarr
+      - 5055:5055 # Overseerr
+      - 7575:7575 # Homarr
+    volumes:
+      - /home/docker/arr-stack:/gluetun
+    environment:
+      # See https://github.com/qdm12/gluetun-wiki/tree/main/setup#setup
+      - VPN_SERVICE_PROVIDER=$VPN_SERVICE_PROVIDER
+      - VPN_ENDPOINT_IP=$VPN_ENDPOINT_IP
+      - VPN_ENDPOINT_PORT=$VPN_ENDPOINT_PORT
+      - VPN_TYPE=$VPN_TYPE
+      # Wireguard:
+      - WIREGUARD_PUBLIC_KEY=$WIREGUARD_PUBLIC_KEY
+      - WIREGUARD_PRIVATE_KEY=$WIREGUARD_PRIVATE_KEY # See https://github.com/qdm12/gluetun-wiki/blob/main/setup/providers/nordvpn.md#obtain-your-wireguard-private-key
+      - WIREGUARD_ADDRESSES=$WIREGUARD_ADRESSES
+      # Timezone for accurate log times
+      - TZ=$TZ
+      # Server list updater
+      # See https://github.com/qdm12/gluetun-wiki/blob/main/setup/servers.md#update-the-vpn-servers-list
+      - UPDATER_PERIOD=24h
+
+  qbittorrent:
+    image: linuxserver/qbittorrent
+    container_name: qbittorrent
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+      - WEBUI_PORT=8085
+    volumes:
+      - /home/docker/arr-stack/qbittorrent:/config
+      - /home/nfs/media/Downloads:/downloads
+    depends_on:
+      - gluetun
+    restart: always
+
+  radarr:
+    image: linuxserver/radarr:latest
+    container_name: radarr
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+    volumes:
+      - /home/docker/arr-stack/radarr/data:/config
+      - /home/nfs/media/Filme:/movies
+      - /home/nfs/media/Downloads:/downloads
+    restart: unless-stopped
+
+  sonarr:
+    image: linuxserver/sonarr:latest
+    container_name: sonarr
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+    volumes:
+      - /home/docker/arr-stack/sonarr/data:/config
+      - /home/nfs/media:/tv
+      - /home/nfs/media/Downloads:/downloads
+    restart: unless-stopped
+
+
+  prowlarr:
+    image: linuxserver/prowlarr:latest
+    container_name: prowlarr
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+    volumes:
+      - /home/docker/arr-stack/prowlarr/data:/config
+    restart: unless-stopped
+    
+  overseerr:
+    image: linuxserver/overseerr:latest
+    container_name: overseerr
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+    volumes:
+      - /home/docker/arr-stack/overseerr/data:/config
+    restart: unless-stopped
+
+  homarr:
+    image: ghcr.io/ajnart/homarr:latest
+    container_name: homarr
+    network_mode: "service:gluetun"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # Optional, only if you want docker integration
+
+      - /home/docker/arr-stack/homarr/configs:/app/data/configs
+      - /home/docker/arr-stack/homarr/icons:/app/public/icons
+      - /home/docker/arr-stack/homarr/data:/data
+    restart: unless-stopped
