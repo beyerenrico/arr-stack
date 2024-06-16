@@ -18,6 +18,7 @@ services:
       - 9696:9696 # Prowlarr
       - 5055:5055 # Overseerr
       - 7575:7575 # Homarr
+      - 8191:8191 # FlareSolverr
     volumes:
       - /home/docker/arr-stack:/gluetun
     environment:
@@ -116,3 +117,14 @@ services:
       - /home/docker/arr-stack/homarr/icons:/app/public/icons
       - /home/docker/arr-stack/homarr/data:/data
     restart: unless-stopped
+
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    network_mode: "service:gluetun"
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - LOG_HTML=${LOG_HTML:-false}
+      - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-none}
+      - TZ=$TZ
+    restart: unless-stopped 
