@@ -23,6 +23,7 @@ services:
       - 4380:80 # nginx-proxy-manager
       - 4343:443 # nginx-proxy-manager
       - 4381:81 # nginx-proxy-manager
+      - 6789:6789 # NZBGet
     volumes:
       - /home/docker/arr-stack:/gluetun
     environment:
@@ -158,3 +159,18 @@ services:
     volumes:
       - /home/docker/arr-stack/nginxproxymanager/data:/data
       - /home/docker/arr-stack/nginxproxymanager/letsencrypt:/etc/letsencrypt
+
+  nzbget:
+    image: linuxserver/nzbget:latest
+    container_name: nzbget
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+      - NZBGET_USER=$NZBGET_USER
+      - NZBGET_PASS=$NZBGET_PASS #optional
+    volumes:
+      - /home/docker/arr-stack/nzbget/data:/config
+      - /home/nfs/media/Downloads:/downloads
+    restart: unless-stopped
