@@ -15,10 +15,14 @@ services:
       - 8085:8085 # qbittorrent
       - 8989:8989 # Sonarr
       - 7878:7878 # Radarr
+      - 6767:6767 # Bazarr
       - 9696:9696 # Prowlarr
       - 5055:5055 # Overseerr
       - 7575:7575 # Homarr
       - 8191:8191 # FlareSolverr
+      - 4380:80 # nginx-proxy-manager
+      - 4343:443 # nginx-proxy-manager
+      - 4381:81 # nginx-proxy-manager
     volumes:
       - /home/docker/arr-stack:/gluetun
     environment:
@@ -38,7 +42,7 @@ services:
       - UPDATER_PERIOD=24h
 
   qbittorrent:
-    image: linuxserver/qbittorrent
+    image: linuxserver/qbittorrent:latest
     container_name: qbittorrent
     network_mode: "service:gluetun"
     environment:
@@ -81,6 +85,18 @@ services:
       - /home/nfs/media/Downloads:/downloads
     restart: unless-stopped
 
+  bazarr:
+    image: linuxserver/bazarr:latest
+    container_name: bazarr
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+    volumes:
+      - /home/docker/arr-stack/bazarr/data:/config
+      - /home/nfs/media:/tv
+    restart: unless-stopped
 
   prowlarr:
     image: linuxserver/prowlarr:latest
@@ -127,4 +143,18 @@ services:
       - LOG_HTML=${LOG_HTML:-false}
       - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-none}
       - TZ=$TZ
-    restart: unless-stopped 
+    restart: unless-stopped
+
+  nginxproxymanager:
+    image: jc21/nginx-proxy-manager:latest
+    container_name: nginxproxymanager
+    network_mode: "service:gluetun"
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - LOG_HTML=${LOG_HTML:-false}
+      - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-none}
+      - TZ=$TZ
+    restart: unless-stopped
+    volumes:
+      - /home/docker/arr-stack/nginxproxymanager/data:/data
+      - /home/docker/arr-stack/nginxproxymanager/letsencrypt:/etc/letsencrypt
