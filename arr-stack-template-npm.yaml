@@ -46,7 +46,7 @@ services:
     network_mode: "service:gluetun"
     environment:
       - TZ=$TZ
-      - WEBPASSWORD=your_secure_password
+      - WEBPASSWORD=$PIHOLE_PASS
       - DNS1=127.0.0.1#5053
       - DNS2=8.8.8.8
       - VIRTUAL_HOST=pihole.local
