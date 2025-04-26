@@ -13,29 +13,20 @@ services:
       - 53:53/udp      # Pi-hole DNS UDP
       - 80:80          # NPM HTTP
       - 443:443        # NPM HTTPS
-      - 81:81          # NPM Admin
+      - 81:81          # NPM Admin UI
       - 6881:6881
       - 6881:6881/udp
-      - 8085:8085      # qbittorrent
-      - 8989:8989      # Sonarr
-      - 7878:7878      # Radarr
-      - 6767:6767      # Bazarr
-      - 9696:9696      # Prowlarr
-      - 5055:5055      # Overseerr
-      - 7575:7575      # Homarr
-      - 8191:8191      # FlareSolverr
-      - 6789:6789      # NZBGet
     volumes:
       - /home/docker/arr-stack:/gluetun
     environment:
-      - VPN_SERVICE_PROVIDER=$VPN_SERVICE_PROVIDER
-      - VPN_ENDPOINT_IP=$VPN_ENDPOINT_IP
-      - VPN_ENDPOINT_PORT=$VPN_ENDPOINT_PORT
-      - VPN_TYPE=$VPN_TYPE
-      - WIREGUARD_PUBLIC_KEY=$WIREGUARD_PUBLIC_KEY
-      - WIREGUARD_PRIVATE_KEY=$WIREGUARD_PRIVATE_KEY
-      - WIREGUARD_ADDRESSES=$WIREGUARD_ADDRESSES
-      - TZ=$TZ
+      - VPN_SERVICE_PROVIDER=${VPN_SERVICE_PROVIDER}
+      - VPN_ENDPOINT_IP=${VPN_ENDPOINT_IP}
+      - VPN_ENDPOINT_PORT=${VPN_ENDPOINT_PORT}
+      - VPN_TYPE=${VPN_TYPE}
+      - WIREGUARD_PUBLIC_KEY=${WIREGUARD_PUBLIC_KEY}
+      - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY}
+      - WIREGUARD_ADDRESSES=${WIREGUARD_ADDRESSES}
+      - TZ=${TZ}
       - UPDATER_PERIOD=24h
     networks:
       - npm-network
@@ -45,8 +36,8 @@ services:
     container_name: pihole
     network_mode: "service:gluetun"
     environment:
-      - TZ=$TZ
-      - WEBPASSWORD=$PIHOLE_PASS
+      - TZ=${TZ}
+      - WEBPASSWORD=${PIHOLE_PASS}
       - DNS1=127.0.0.1#5053
       - DNS2=8.8.8.8
       - VIRTUAL_HOST=pihole.local
@@ -58,15 +49,11 @@ services:
   nginxproxymanager:
     image: jc21/nginx-proxy-manager:latest
     container_name: nginxproxymanager
-    ports:
-      - 80:80
-      - 443:443
-      - 81:81
     volumes:
       - /home/docker/arr-stack/nginxproxymanager/data:/data
       - /home/docker/arr-stack/nginxproxymanager/letsencrypt:/etc/letsencrypt
     environment:
-      - TZ=$TZ
+      - TZ=${TZ}
     networks:
       - npm-network
     restart: unless-stopped
@@ -76,9 +63,9 @@ services:
     container_name: qbittorrent
     network_mode: "service:gluetun"
     environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
       - WEBUI_PORT=8085
     volumes:
       - /home/docker/arr-stack/qbittorrent:/config
@@ -92,9 +79,9 @@ services:
     container_name: radarr
     network_mode: "service:gluetun"
     environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
     volumes:
       - /home/docker/arr-stack/radarr/data:/config
       - /home/nfs/media/Filme:/movies
@@ -106,9 +93,9 @@ services:
     container_name: sonarr
     network_mode: "service:gluetun"
     environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
     volumes:
       - /home/docker/arr-stack/sonarr/data:/config
       - /home/nfs/media:/tv
@@ -120,9 +107,9 @@ services:
     container_name: bazarr
     network_mode: "service:gluetun"
     environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
     volumes:
       - /home/docker/arr-stack/bazarr/data:/config
       - /home/nfs/media:/tv
@@ -133,9 +120,9 @@ services:
     container_name: prowlarr
     network_mode: "service:gluetun"
     environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
     volumes:
       - /home/docker/arr-stack/prowlarr/data:/config
     restart: unless-stopped
@@ -145,9 +132,9 @@ services:
     container_name: overseerr
     network_mode: "service:gluetun"
     environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
     volumes:
       - /home/docker/arr-stack/overseerr/data:/config
     restart: unless-stopped
@@ -171,7 +158,7 @@ services:
       - LOG_LEVEL=${LOG_LEVEL:-info}
       - LOG_HTML=${LOG_HTML:-false}
       - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-none}
-      - TZ=$TZ
+      - TZ=${TZ}
     restart: unless-stopped
 
   nzbget:
@@ -179,11 +166,11 @@ services:
     container_name: nzbget
     network_mode: "service:gluetun"
     environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ
-      - NZBGET_USER=$NZBGET_USER
-      - NZBGET_PASS=$NZBGET_PASS
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - NZBGET_USER=${NZBGET_USER}
+      - NZBGET_PASS=${NZBGET_PASS}
     volumes:
       - /home/docker/arr-stack/nzbget/data:/config
       - /home/nfs/media/Downloads:/downloads
