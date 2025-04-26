@@ -1,0 +1,194 @@
+version: "3"
+
+services:
+  gluetun:
+    image: qmcgaw/gluetun
+    container_name: gluetun
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    ports:
+      - 53:53/tcp      # Pi-hole DNS TCP
+      - 53:53/udp      # Pi-hole DNS UDP
+      - 80:80          # NPM HTTP
+      - 443:443        # NPM HTTPS
+      - 81:81          # NPM Admin
+      - 6881:6881
+      - 6881:6881/udp
+      - 8085:8085      # qbittorrent
+      - 8989:8989      # Sonarr
+      - 7878:7878      # Radarr
+      - 6767:6767      # Bazarr
+      - 9696:9696      # Prowlarr
+      - 5055:5055      # Overseerr
+      - 7575:7575      # Homarr
+      - 8191:8191      # FlareSolverr
+      - 6789:6789      # NZBGet
+    volumes:
+      - /home/docker/arr-stack:/gluetun
+    environment:
+      - VPN_SERVICE_PROVIDER=$VPN_SERVICE_PROVIDER
+      - VPN_ENDPOINT_IP=$VPN_ENDPOINT_IP
+      - VPN_ENDPOINT_PORT=$VPN_ENDPOINT_PORT
+      - VPN_TYPE=$VPN_TYPE
+      - WIREGUARD_PUBLIC_KEY=$WIREGUARD_PUBLIC_KEY
+      - WIREGUARD_PRIVATE_KEY=$WIREGUARD_PRIVATE_KEY
+      - WIREGUARD_ADDRESSES=$WIREGUARD_ADDRESSES
+      - TZ=$TZ
+      - UPDATER_PERIOD=24h
+    networks:
+      - npm-network
+
+  pihole:
+    image: pihole/pihole:latest
+    container_name: pihole
+    network_mode: "service:gluetun"
+    environment:
+      - TZ=$TZ
+      - WEBPASSWORD=your_secure_password
+      - DNS1=127.0.0.1#5053
+      - DNS2=8.8.8.8
+      - VIRTUAL_HOST=pihole.local
+    volumes:
+      - /home/docker/arr-stack/pihole/etc-pihole:/etc/pihole
+      - /home/docker/arr-stack/pihole/etc-dnsmasq.d:/etc/dnsmasq.d
+    restart: unless-stopped
+
+  nginxproxymanager:
+    image: jc21/nginx-proxy-manager:latest
+    container_name: nginxproxymanager
+    ports:
+      - 80:80
+      - 443:443
+      - 81:81
+    volumes:
+      - /home/docker/arr-stack/nginxproxymanager/data:/data
+      - /home/docker/arr-stack/nginxproxymanager/letsencrypt:/etc/letsencrypt
+    environment:
+      - TZ=$TZ
+    networks:
+      - npm-network
+    restart: unless-stopped
+
+  qbittorrent:
+    image: linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+      - WEBUI_PORT=8085
+    volumes:
+      - /home/docker/arr-stack/qbittorrent:/config
+      - /home/nfs/media/Downloads:/downloads
+    depends_on:
+      - gluetun
+    restart: always
+
+  radarr:
+    image: linuxserver/radarr:latest
+    container_name: radarr
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+    volumes:
+      - /home/docker/arr-stack/radarr/data:/config
+      - /home/nfs/media/Filme:/movies
+      - /home/nfs/media/Downloads:/downloads
+    restart: unless-stopped
+
+  sonarr:
+    image: linuxserver/sonarr:latest
+    container_name: sonarr
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+    volumes:
+      - /home/docker/arr-stack/sonarr/data:/config
+      - /home/nfs/media:/tv
+      - /home/nfs/media/Downloads:/downloads
+    restart: unless-stopped
+
+  bazarr:
+    image: linuxserver/bazarr:latest
+    container_name: bazarr
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+    volumes:
+      - /home/docker/arr-stack/bazarr/data:/config
+      - /home/nfs/media:/tv
+    restart: unless-stopped
+
+  prowlarr:
+    image: linuxserver/prowlarr:latest
+    container_name: prowlarr
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+    volumes:
+      - /home/docker/arr-stack/prowlarr/data:/config
+    restart: unless-stopped
+
+  overseerr:
+    image: linuxserver/overseerr:latest
+    container_name: overseerr
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+    volumes:
+      - /home/docker/arr-stack/overseerr/data:/config
+    restart: unless-stopped
+
+  homarr:
+    image: ghcr.io/ajnart/homarr:latest
+    container_name: homarr
+    network_mode: "service:gluetun"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /home/docker/arr-stack/homarr/configs:/app/data/configs
+      - /home/docker/arr-stack/homarr/icons:/app/public/icons
+      - /home/docker/arr-stack/homarr/data:/data
+    restart: unless-stopped
+
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    network_mode: "service:gluetun"
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - LOG_HTML=${LOG_HTML:-false}
+      - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-none}
+      - TZ=$TZ
+    restart: unless-stopped
+
+  nzbget:
+    image: linuxserver/nzbget:latest
+    container_name: nzbget
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+      - NZBGET_USER=$NZBGET_USER
+      - NZBGET_PASS=$NZBGET_PASS
+    volumes:
+      - /home/docker/arr-stack/nzbget/data:/config
+      - /home/nfs/media/Downloads:/downloads
+    restart: unless-stopped
+
+networks:
+  npm-network:
+    driver: bridge
