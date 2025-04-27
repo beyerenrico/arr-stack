@@ -12,32 +12,31 @@ services:
     ports:
       - 6881:6881
       - 6881:6881/udp
-      - 8085:8085 # qbittorrent
-      - 8989:8989 # Sonarr
-      - 7878:7878 # Radarr
-      - 6767:6767 # Bazarr
-      - 9696:9696 # Prowlarr
-      - 5055:5055 # Overseerr
-      - 7575:7575 # Homarr
-      - 8191:8191 # FlareSolverr
-      - 4380:80 # nginx-proxy-manager
-      - 4343:443 # nginx-proxy-manager
-      - 4381:81 # nginx-proxy-manager
-      - 6789:6789 # NZBGet
+      - 6789:6789     # NZBGet
+      - 8085:8085     # qbittorrent
+      - 8989:8989     # Sonarr
+      - 7878:7878     # Radarr
+      - 6767:6767     # Bazarr
+      - 9696:9696     # Prowlarr
+      - 5055:5055     # Overseerr
+      - 8191:8191     # FlareSolverr
+      - 4380:80       # nginx-proxy-manager
+      - 4343:443      # nginx-proxy-manager
+      - 4381:81       # nginx-proxy-manager
     volumes:
       - /home/docker/arr-stack:/gluetun
     environment:
       # See https://github.com/qdm12/gluetun-wiki/tree/main/setup#setup
-      - VPN_SERVICE_PROVIDER=$VPN_SERVICE_PROVIDER
-      - VPN_ENDPOINT_IP=$VPN_ENDPOINT_IP
-      - VPN_ENDPOINT_PORT=$VPN_ENDPOINT_PORT
-      - VPN_TYPE=$VPN_TYPE
+      - VPN_SERVICE_PROVIDER=${VPN_SERVICE_PROVIDER}
+      - VPN_ENDPOINT_IP=${VPN_ENDPOINT_IP}
+      - VPN_ENDPOINT_PORT=${VPN_ENDPOINT_PORT}
+      - VPN_TYPE=${VPN_TYPE}
       # Wireguard:
-      - WIREGUARD_PUBLIC_KEY=$WIREGUARD_PUBLIC_KEY
-      - WIREGUARD_PRIVATE_KEY=$WIREGUARD_PRIVATE_KEY # See https://github.com/qdm12/gluetun-wiki/blob/main/setup/providers/nordvpn.md#obtain-your-wireguard-private-key
-      - WIREGUARD_ADDRESSES=$WIREGUARD_ADRESSES
+      - WIREGUARD_PUBLIC_KEY=${WIREGUARD_PUBLIC_KEY}
+      - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY} # See https://github.com/qdm12/gluetun-wiki/blob/main/setup/providers/nordvpn.md#obtain-your-wireguard-private-key
+      - WIREGUARD_ADDRESSES=${WIREGUARD_ADRESSES}
       # Timezone for accurate log times
-      - TZ=$TZ
+      - TZ=${TZ}
       # Server list updater
       # See https://github.com/qdm12/gluetun-wiki/blob/main/setup/servers.md#update-the-vpn-servers-list
       - UPDATER_PERIOD=24h
@@ -47,9 +46,9 @@ services:
     container_name: qbittorrent
     network_mode: "service:gluetun"
     environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
       - WEBUI_PORT=8085
     volumes:
       - /home/docker/arr-stack/qbittorrent:/config
@@ -63,9 +62,9 @@ services:
     container_name: radarr
     network_mode: "service:gluetun"
     environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
     volumes:
       - /home/docker/arr-stack/radarr/data:/config
       - /home/nfs/media/Filme:/movies
@@ -77,9 +76,9 @@ services:
     container_name: sonarr
     network_mode: "service:gluetun"
     environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
     volumes:
       - /home/docker/arr-stack/sonarr/data:/config
       - /home/nfs/media:/tv
@@ -91,9 +90,9 @@ services:
     container_name: bazarr
     network_mode: "service:gluetun"
     environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
     volumes:
       - /home/docker/arr-stack/bazarr/data:/config
       - /home/nfs/media:/tv
@@ -104,9 +103,9 @@ services:
     container_name: prowlarr
     network_mode: "service:gluetun"
     environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
     volumes:
       - /home/docker/arr-stack/prowlarr/data:/config
     restart: unless-stopped
@@ -116,23 +115,11 @@ services:
     container_name: overseerr
     network_mode: "service:gluetun"
     environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
     volumes:
       - /home/docker/arr-stack/overseerr/data:/config
-    restart: unless-stopped
-
-  homarr:
-    image: ghcr.io/ajnart/homarr:latest
-    container_name: homarr
-    network_mode: "service:gluetun"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock # Optional, only if you want docker integration
-
-      - /home/docker/arr-stack/homarr/configs:/app/data/configs
-      - /home/docker/arr-stack/homarr/icons:/app/public/icons
-      - /home/docker/arr-stack/homarr/data:/data
     restart: unless-stopped
 
   flaresolverr:
@@ -143,7 +130,7 @@ services:
       - LOG_LEVEL=${LOG_LEVEL:-info}
       - LOG_HTML=${LOG_HTML:-false}
       - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-none}
-      - TZ=$TZ
+      - TZ=${TZ}
     restart: unless-stopped
 
   nginxproxymanager:
@@ -154,7 +141,7 @@ services:
       - LOG_LEVEL=${LOG_LEVEL:-info}
       - LOG_HTML=${LOG_HTML:-false}
       - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-none}
-      - TZ=$TZ
+      - TZ=${TZ}
     restart: unless-stopped
     volumes:
       - /home/docker/arr-stack/nginxproxymanager/data:/data
@@ -165,11 +152,11 @@ services:
     container_name: nzbget
     network_mode: "service:gluetun"
     environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ
-      - NZBGET_USER=$NZBGET_USER
-      - NZBGET_PASS=$NZBGET_PASS #optional
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - NZBGET_USER=${NZBGET_USER}
+      - NZBGET_PASS=${NZBGET_PASS} #optional
     volumes:
       - /home/docker/arr-stack/nzbget/data:/config
       - /home/nfs/media/Downloads:/downloads
