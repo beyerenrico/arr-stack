@@ -20,9 +20,6 @@ services:
       - 9696:9696     # Prowlarr
       - 5055:5055     # Overseerr
       - 8191:8191     # FlareSolverr
-      - 4380:80       # nginx-proxy-manager
-      - 4343:443      # nginx-proxy-manager
-      - 4381:81       # nginx-proxy-manager
     volumes:
       - /home/docker/arr-stack:/gluetun
     environment:
@@ -132,20 +129,6 @@ services:
       - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-none}
       - TZ=${TZ}
     restart: unless-stopped
-
-  nginxproxymanager:
-    image: jc21/nginx-proxy-manager:latest
-    container_name: nginxproxymanager
-    network_mode: "service:gluetun"
-    environment:
-      - LOG_LEVEL=${LOG_LEVEL:-info}
-      - LOG_HTML=${LOG_HTML:-false}
-      - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-none}
-      - TZ=${TZ}
-    restart: unless-stopped
-    volumes:
-      - /home/docker/arr-stack/nginxproxymanager/data:/data
-      - /home/docker/arr-stack/nginxproxymanager/letsencrypt:/etc/letsencrypt
 
   nzbget:
     image: linuxserver/nzbget:latest
