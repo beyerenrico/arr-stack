@@ -20,6 +20,7 @@ services:
       - 9696:9696     # Prowlarr
       - 5055:5055     # Overseerr
       - 8191:8191     # FlareSolverr
+      - 8090:8090     # Mylar3
     volumes:
       - /home/docker/arr-stack:/gluetun
     environment:
@@ -128,6 +129,20 @@ services:
       - LOG_HTML=${LOG_HTML:-false}
       - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-none}
       - TZ=${TZ}
+    restart: unless-stopped
+
+  mylar3:
+    image: linuxserver/mylar3:latest
+    container_name: mylar3
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - /home/docker/arr-stack/mylar3/data:/config
+      - /home/nfs/media/Comics:/comics
+      - /home/nfs/media/Downloads:/downloads
     restart: unless-stopped
 
   nzbget:
