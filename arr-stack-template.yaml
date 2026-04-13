@@ -20,7 +20,7 @@ services:
       - 9696:9696     # Prowlarr
       - 5055:5055     # Overseerr
       - 8191:8191     # FlareSolverr
-      - 8090:8090     # Mylar3
+      - 8090:8090     # Comicarr
     volumes:
       - /home/docker/arr-stack:/gluetun
     environment:
@@ -131,17 +131,18 @@ services:
       - TZ=${TZ}
     restart: unless-stopped
 
-  mylar3:
-    image: linuxserver/mylar3:latest
-    container_name: mylar3
+  comicarr:
+    image: ghcr.io/frankieramirez/comicarr:latest
+    container_name: comicarr
     network_mode: "service:gluetun"
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
     volumes:
-      - /home/docker/arr-stack/mylar3/data:/config
+      - /home/docker/arr-stack/comicarr/data:/config
       - /home/nfs/media/Comics:/comics
+      - /home/nfs/media/Manga:/manga
       - /home/nfs/media/Downloads:/downloads
     restart: unless-stopped
 
