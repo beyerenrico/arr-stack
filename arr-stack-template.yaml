@@ -139,6 +139,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
+      - COMICARR_LOG_LEVEL=DEBUG
     volumes:
       - /home/docker/arr-stack/comicarr/data:/config
       - /home/nfs/media/Comics:/comics
