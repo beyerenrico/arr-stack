@@ -144,6 +144,8 @@ services:
       - /home/nfs/media/Comics:/comics
       - /home/nfs/media/Manga:/manga
       - /home/nfs/media/Downloads:/downloads
+    depends_on:
+      - gluetun
     restart: unless-stopped
 
   nzbget:
