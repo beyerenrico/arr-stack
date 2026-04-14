@@ -20,7 +20,7 @@ services:
       - 9696:9696     # Prowlarr
       - 5055:5055     # Overseerr
       - 8191:8191     # FlareSolverr
-      - 8090:8090     # Comicarr
+      - 8091:8090     # Comicarr
     volumes:
       - /home/docker/arr-stack:/gluetun
     environment:
@@ -139,7 +139,6 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-      - COMICARR_LOG_LEVEL=DEBUG
     volumes:
       - /home/docker/arr-stack/comicarr/data:/config
       - /home/nfs/media/Comics:/comics
