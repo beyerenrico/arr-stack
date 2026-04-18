@@ -163,3 +163,17 @@ services:
       - /home/nfs/media/Books:/books
       - /home/nfs/media/LightNovels:/lightnovels
     restart: unless-stopped
+
+komf:
+    image: sndxr/komf:latest
+    container_name: komf
+    ports:
+      - "8086:8085"
+    user: "1000:1000"
+    environment: # optional env config
+      - KOMF_KAVITA_BASE_URI=${KOMF_KAVITA_BASE_URI}
+      - KOMF_KAVITA_API_KEY=${KOMF_KAVITA_API_KEY}
+      - KOMF_LOG_LEVEL=${KOMF_LOG_LEVEL}
+    volumes:
+      - /home/docker/arr-stack/komf/config:/config #path to directory with application.yml and database file
+    restart: unless-stopped
