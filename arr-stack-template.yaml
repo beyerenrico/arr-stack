@@ -164,7 +164,7 @@ services:
       - /home/nfs/media/LightNovels:/lightnovels
     restart: unless-stopped
 
-komf:
+  komf:
     image: sndxr/komf:latest
     container_name: komf
     ports:
