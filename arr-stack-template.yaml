@@ -146,15 +146,16 @@ services:
     restart: unless-stopped
 
   kavita:
-    image: jvmilazz0/kavita:latest
+    image: lscr.io/linuxserver/kavita:latest
     container_name: kavita
     # Kavita is intentionally NOT routed through gluetun — it needs to be
     # reachable on the local network. Access via http://<pi-ip>:5000
     ports:
       - 5000:5000
     environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
       - TZ=${TZ}
-    user: "${PUID}:${PGID}"
     volumes:
       - /home/docker/arr-stack/kavita/config:/kavita/config
       - /home/nfs/media/Manga:/manga
