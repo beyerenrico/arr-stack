@@ -157,7 +157,7 @@ services:
       - PGID=${PGID}
       - TZ=${TZ}
     volumes:
-      - /home/docker/arr-stack/kavita/config:/kavita/config
+      - /home/docker/arr-stack/kavita/config:/config
       - /home/nfs/media/Manga:/manga
       - /home/nfs/media/Comics:/comics
       - /home/nfs/media/Books:/books
