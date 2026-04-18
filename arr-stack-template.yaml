@@ -20,7 +20,6 @@ services:
       - 9696:9696     # Prowlarr
       - 5055:5055     # Overseerr
       - 8191:8191     # FlareSolverr
-      - 8091:8090     # Comicarr
     volumes:
       - /home/docker/arr-stack:/gluetun
     environment:
@@ -107,7 +106,7 @@ services:
     volumes:
       - /home/docker/arr-stack/prowlarr/data:/config
     restart: unless-stopped
-    
+
   overseerr:
     image: linuxserver/overseerr:latest
     container_name: overseerr
@@ -131,23 +130,6 @@ services:
       - TZ=${TZ}
     restart: unless-stopped
 
-  comicarr:
-    image: ghcr.io/frankieramirez/comicarr:latest
-    container_name: comicarr
-    network_mode: "service:gluetun"
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-    volumes:
-      - /home/docker/arr-stack/comicarr/data:/config
-      - /home/nfs/media/Comics:/comics
-      - /home/nfs/media/Manga:/manga
-      - /home/nfs/media/Downloads:/downloads
-    depends_on:
-      - gluetun
-    restart: unless-stopped
-
   nzbget:
     image: linuxserver/nzbget:latest
     container_name: nzbget
@@ -161,4 +143,22 @@ services:
     volumes:
       - /home/docker/arr-stack/nzbget/data:/config
       - /home/nfs/media/Downloads:/downloads
+    restart: unless-stopped
+
+  kavita:
+    image: jvmilazz0/kavita:latest
+    container_name: kavita
+    # Kavita is intentionally NOT routed through gluetun — it needs to be
+    # reachable on the local network. Access via http://<pi-ip>:5000
+    ports:
+      - 5000:5000
+    environment:
+      - TZ=${TZ}
+    user: "${PUID}:${PGID}"
+    volumes:
+      - /home/docker/arr-stack/kavita/config:/kavita/config
+      - /home/nfs/media/Manga:/manga
+      - /home/nfs/media/Comics:/comics
+      - /home/nfs/media/Books:/books
+      - /home/nfs/media/LightNovels:/lightnovels
     restart: unless-stopped
